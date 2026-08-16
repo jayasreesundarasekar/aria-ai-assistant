@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aria — Personal Assistant</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet"
+  />
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+  />
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+<body>
+  <div class="app-shell">
+
+    <!-- Sidebar / bottom nav -->
+    <nav class="rail" aria-label="Primary">
+      <div class="rail-brand">
+        <span class="brand-mark" aria-hidden="true">
+          <span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span>
+        </span>
+        <span class="brand-name">Aria</span>
+      </div>
+
+      <div class="rail-nav" role="tablist" aria-orientation="vertical">
+        <button class="rail-item is-active" data-panel="chat" role="tab" aria-selected="true">
+          <i class="fa fa-comments-o" aria-hidden="true"></i>
+          <span>Chat</span>
+        </button>
+        <button class="rail-item" data-panel="documents" role="tab" aria-selected="false">
+          <i class="fa fa-file-text-o" aria-hidden="true"></i>
+          <span>Documents</span>
+        </button>
+        <button class="rail-item" data-panel="image" role="tab" aria-selected="false">
+          <i class="fa fa-picture-o" aria-hidden="true"></i>
+          <span>Image</span>
+        </button>
+        <button class="rail-item" data-panel="translate" role="tab" aria-selected="false">
+          <i class="fa fa-language" aria-hidden="true"></i>
+          <span>Translate</span>
+        </button>
+      </div>
+
+      <div class="rail-footer">
+        <button id="theme-toggle" class="icon-button" title="Toggle theme" aria-label="Toggle light and dark mode">
+          <i class="fa fa-moon-o" aria-hidden="true"></i>
+        </button>
+      </div>
+    </nav>
+
+    <!-- Main content -->
+    <main class="stage">
+
+      <!-- ============ CHAT PANEL ============ -->
+      <section class="panel is-active" id="panel-chat" role="tabpanel" aria-labelledby="chat">
+        <header class="panel-header">
+          <div>
+            <p class="eyebrow">Mode 01 — Conversation</p>
+            <h1>Talk it through</h1>
+          </div>
+          <div class="panel-header-controls">
+            <label class="field-label" for="voice-options">Voice</label>
+            <select id="voice-options" class="select">
+              <option value="hannah">Hannah</option>
+              <option value="autumn">Autumn</option>
+              <option value="diana">Diana</option>
+              <option value="austin">Austin</option>
+              <option value="daniel">Daniel</option>
+              <option value="troy">Troy</option>
+            </select>
+          </div>
+        </header>
+
+        <div class="chat-window" id="chat-window">
+          <div class="chat-empty" id="chat-empty">
+            <span class="empty-waveform" aria-hidden="true">
+              <span></span><span></span><span></span><span></span><span></span>
+            </span>
+            <p>Ask a question, paste something to reason through, or hold the mic and just talk.</p>
+          </div>
+          <div id="message-list"></div>
+          <div class="typing-row" id="typing-indicator" hidden>
+            <div class="bubble bubble-bot typing-dots"><span></span><span></span><span></span></div>
+          </div>
+        </div>
+
+        <form class="composer" id="chat-form">
+          <button type="button" id="mic-button" class="mic-button" aria-label="Record voice message">
+            <i class="fa fa-microphone" aria-hidden="true"></i>
+            <span class="mic-ring"></span>
+          </button>
+          <input
+            type="text"
+            id="message-input"
+            class="composer-input"
+            placeholder="Message Aria…"
+            autocomplete="off"
+          />
+          <button type="submit" id="send-button" class="send-button" aria-label="Send message">
+            <i class="fa fa-arrow-up" aria-hidden="true"></i>
+          </button>
+        </form>
+      </section>
+
+      <!-- ============ DOCUMENTS PANEL ============ -->
+      <section class="panel" id="panel-documents" role="tabpanel" aria-labelledby="documents">
+        <header class="panel-header">
+          <div>
+            <p class="eyebrow">Mode 02 — Document analysis</p>
+            <h1>Read the fine print</h1>
+          </div>
+        </header>
+
+        <div class="workbench">
+          <div class="dropzone" id="doc-dropzone" tabindex="0" role="button" aria-label="Upload a document">
+            <input type="file" id="doc-input" accept=".pdf,.docx,.txt,.md" hidden />
+            <i class="fa fa-cloud-upload" aria-hidden="true"></i>
+            <p class="dropzone-title">Drop a PDF, Word doc, or text file</p>
+            <p class="dropzone-sub">or click to browse · max 20MB</p>
+            <div class="dropzone-file" id="doc-file-name" hidden></div>
+          </div>
+
+          <div class="field-row">
+            <label class="field-label" for="doc-question">Ask about it <span class="field-optional">(optional — leave blank to summarize)</span></label>
+            <input type="text" id="doc-question" class="text-input" placeholder="e.g. What are the key deadlines mentioned?" />
+          </div>
+
+          <button class="primary-button" id="doc-submit" disabled>
+            <i class="fa fa-magic" aria-hidden="true"></i>
+            <span>Analyze document</span>
+          </button>
+
+          <div class="result-card" id="doc-result" hidden>
+            <div class="result-header">
+              <i class="fa fa-file-text-o" aria-hidden="true"></i>
+              <span id="doc-result-filename"></span>
+            </div>
+            <div class="result-body" id="doc-result-body"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ IMAGE PANEL ============ -->
+      <section class="panel" id="panel-image" role="tabpanel" aria-labelledby="image">
+        <header class="panel-header">
+          <div>
+            <p class="eyebrow">Mode 03 — Vision</p>
+            <h1>Show, don't tell</h1>
+          </div>
+        </header>
+
+        <div class="workbench">
+          <div class="dropzone" id="img-dropzone" tabindex="0" role="button" aria-label="Upload an image">
+            <input type="file" id="img-input" accept=".png,.jpg,.jpeg,.gif,.webp" hidden />
+            <img id="img-preview" class="dropzone-preview" hidden alt="Uploaded preview" />
+            <div id="img-dropzone-empty">
+              <i class="fa fa-image" aria-hidden="true"></i>
+              <p class="dropzone-title">Drop an image here</p>
+              <p class="dropzone-sub">or click to browse · PNG, JPG, GIF, WEBP</p>
+            </div>
+          </div>
+
+          <div class="segmented" id="img-mode" role="radiogroup" aria-label="Analysis mode">
+            <button type="button" class="segmented-item is-active" data-mode="caption" role="radio" aria-checked="true">Caption</button>
+            <button type="button" class="segmented-item" data-mode="analyze" role="radio" aria-checked="false">Detailed analysis</button>
+            <button type="button" class="segmented-item" data-mode="question" role="radio" aria-checked="false">Ask a question</button>
+          </div>
+
+          <div class="field-row" id="img-question-row" hidden>
+            <label class="field-label" for="img-question">Your question</label>
+            <input type="text" id="img-question" class="text-input" placeholder="e.g. What brand is this shoe?" />
+          </div>
+
+          <button class="primary-button" id="img-submit" disabled>
+            <i class="fa fa-eye" aria-hidden="true"></i>
+            <span>Analyze image</span>
+          </button>
+
+          <div class="result-card" id="img-result" hidden>
+            <div class="result-header">
+              <i class="fa fa-picture-o" aria-hidden="true"></i>
+              <span id="img-result-filename"></span>
+            </div>
+            <div class="result-body" id="img-result-body"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ TRANSLATE PANEL ============ -->
+      <section class="panel" id="panel-translate" role="tabpanel" aria-labelledby="translate">
+        <header class="panel-header">
+          <div>
+            <p class="eyebrow">Mode 04 — Translator</p>
+            <h1>Say it in another language</h1>
+          </div>
+        </header>
+
+        <div class="translator">
+          <div class="translator-pane">
+            <div class="translator-pane-head">
+              <select id="source-lang" class="select select-quiet">
+                <option>Auto-detect</option>
+              </select>
+              <button type="button" id="translate-mic" class="icon-button" title="Dictate" aria-label="Dictate source text">
+                <i class="fa fa-microphone" aria-hidden="true"></i>
+              </button>
+            </div>
+            <textarea id="source-text" class="translator-textarea" placeholder="Type, paste, or dictate text to translate…"></textarea>
+            <div class="translator-pane-foot">
+              <span class="char-count" id="source-char-count">0</span>
+            </div>
+          </div>
+
+          <button type="button" id="swap-langs" class="swap-button" aria-label="Swap languages">
+            <i class="fa fa-exchange" aria-hidden="true"></i>
+          </button>
+
+          <div class="translator-pane">
+            <div class="translator-pane-head">
+              <select id="target-lang" class="select select-quiet"></select>
+              <button type="button" id="translate-speak" class="icon-button" title="Listen" aria-label="Listen to translation" disabled>
+                <i class="fa fa-volume-up" aria-hidden="true"></i>
+              </button>
+            </div>
+            <textarea id="target-text" class="translator-textarea" placeholder="Translation appears here…" readonly></textarea>
+            <div class="translator-pane-foot">
+              <button type="button" id="copy-translation" class="text-button" disabled>
+                <i class="fa fa-clone" aria-hidden="true"></i> Copy
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <button class="primary-button translate-submit" id="translate-submit" disabled>
+          <i class="fa fa-language" aria-hidden="true"></i>
+          <span>Translate</span>
+        </button>
+      </section>
+
+    </main>
+  </div>
+
+  <div class="toast" id="toast" hidden></div>
+
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
